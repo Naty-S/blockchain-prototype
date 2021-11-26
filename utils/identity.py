@@ -11,11 +11,11 @@ class Identity:
         "address" : address
       }
     }
-    with open("identities.json", "w") as outfile:
+    with open("../data/identities.json", "w") as outfile:
       outfile.write(identity)
   
   def update(key, new_data):
-    with open("identities.json",'r+') as file:
+    with open("../data/identities.json",'r+') as file:
       file_data = json.load(file)
       file_data[key].append(new_data)
       # Sets file's current position at offset.
