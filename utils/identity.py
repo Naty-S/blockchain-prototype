@@ -1,46 +1,24 @@
-import json
 
 
 class Identity:
 
-  def __init__(self, name, privKey, publKey, address) -> None:
-    identity = {
-      name : {
-        "privKey" : privKey,
-        "publKey" : publKey,
-        "address" : address
-      }
-    }
-    with open("../data/identities.json", "w") as outfile:
-      outfile.write(identity)
-  
-  def update(key, new_data):
-    with open("../data/identities.json",'r+') as file:
-      file_data = json.load(file)
-      file_data[key].append(new_data)
-      # Sets file's current position at offset.
-      file.seek(0)
-      json.dump(file_data, file, indent = 2)
+  def __init__(self, name: str, privKey: str, publKey: str, address: str) -> None:
+    self.name = name
+    self.privKey = privKey
+    self.publKey = publKey
+    self.address = address
 
 
 class User(Identity):
 
-  def __init__(self, name, mail, privKey, publKey, address) -> None:
+  def __init__(self, name: str, mail: str, privKey: str, publKey: str, address: str, utxo) -> None:
     super().__init__(name, privKey, publKey, address)
-    new_data = {
-      "mail" : mail,
-      "utxoIns" : [],
-      "utxoOuts" : []
-    }
-    super().update(self.name, new_data)
-
+    self.mail = mail
+    self.utxo = utxo
+    
 
 class Nodo(Identity):
 
-  def __init__(self, name, privKey, publKey, address, port) -> None:
+  def __init__(self, name: str, privKey: str, publKey: str, address: str, port: int) -> None:
     super().__init__(name, privKey, publKey, address)
     self.port = port
-    new_data = {
-      "port" : port
-    }
-    super().update(self.name, new_data)
