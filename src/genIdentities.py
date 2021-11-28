@@ -19,12 +19,14 @@ def genIdentities(identities: int, nodos: int) -> Tuple[list[id.User], list[id.N
     i.utxos.add(tx.Transaction(i, i))
     users.append(i)
 
+  nPort = 5000
   for x in range(nodos):
     privKey, publKey = __genKeys()
     nodo = "nodo" + str(x)
     address = btc.pubkey_to_address(publKey)
-    port = -1 # TODO: por definir
-    i = id.Nodo(nodo, privKey, publKey, address, port)
+    newPort = nPort + x
+    nPort = newPort
+    i = id.Nodo(nodo, privKey, publKey, address, newPort)
     nodes.append(i)
 
   return (users, nodes)
