@@ -1,38 +1,38 @@
 import bitcoin as btc
+from typing import Tuple
 
-import utils.identity as ident
+import modules.identity    as id
+import modules.transaction as tx
 
 
-def genIdentities(identities: int, nodos: int) -> list[ident.Identity]:
+def genIdentities(identities: int, nodos: int) -> Tuple[list[id.User], list[id.Nodo]]:
   
-  idents = list[ident.Identity]
+  users = []
+  nodes = []
 
   for x in range(identities):
     privKey, publKey = __genKeys()
     name = "user" + str(x)
     mail = name + "@gmail.com"
     address = btc.pubkey_to_address(publKey)
-    utxo = {
-      "ins" : {},
-      "outs" : {}
-    }
-    i = ident.User(name, mail, privKey, publKey, address, utxo)
-    idents.append(i)
+    i = id.User(name, mail, privKey, publKey, address)
+    i.utxos.add(tx.Transaction(i, i))
+    users.append(i)
 
   for x in range(nodos):
     privKey, publKey = __genKeys()
     nodo = "nodo" + str(x)
     address = btc.pubkey_to_address(publKey)
     port = -1 # TODO: por definir
-    i = ident.Nodo(nodo, privKey, publKey, address, port)
-    idents.append(i)
+    i = id.Nodo(nodo, privKey, publKey, address, port)
+    nodes.append(i)
   
 
-  return idents
+  return (users, nodes)
 
 
-def __genKeys() -> str:
+def __genKeys() -> Tuple[str, str]:
   privKey = btc.random_key()
   publKey = btc.privkey_to_pubkey(privKey)
 
-  return privKey, publKey
+  return (privKey, publKey)
