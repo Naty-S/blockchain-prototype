@@ -1,7 +1,8 @@
-import random
+import random, socket, pickle
 
-import config.variables as vars
-import modules.identity as id
+
+import config.variables    as vars
+import modules.identity    as id
 import modules.transaction as tx
 
 
@@ -23,14 +24,10 @@ def __genTran(users: list[id.User]) -> tx.Transaction:
 
   inputs = set()
   for utxo in sender.utxos:
-    print("utxo: ", utxo)
     if (utxo.outputs[sender.address][0] == False) & (sum(inputs) < satoshis):
       utxo.outputs[sender.address] = (True, utxo.outputs[sender.address][1])
-      print("utxo: ", utxo)
       inputs.add(utxo.outputs[sender.address][1])
   
-  print("inputs: ", inputs)
-
   if sum(inputs) < satoshis:
     users.remove(sender)
     __genTran(users)
@@ -39,10 +36,21 @@ def __genTran(users: list[id.User]) -> tx.Transaction:
   new_tx.outputs.update(new_tx.change())
   sender.utxos.add(new_tx)
   receiver.utxos.add(new_tx)
-  print("new_tx: ", new_tx)
   
   return new_tx
 
 
 def __sendTran(t: tx.Transaction, nodes: list[id.Nodo]) -> None:
-  pass
+  
+  s = socket.socket()
+  nodo = random.choice(nodes)
+
+  s.connect((socket.gethostname(), nodo.port))
+
+  d = pickle.dumps(t)
+  # print("\n\nlen data client: ", len(d))
+  # print("\n\nTx:", t)
+  s.send(d)
+
+  # print("data recev from node: ", s.recv(1024))
+  s.close()

@@ -18,9 +18,9 @@ class Transaction:
   
 
   def __str__(self) -> str:
-    return "Transaccion: " + self.txId + \
+    return "\n\nTransaccion: " + self.txId + \
            "\n\tEntradas: \n\t\t" + str(self.inputs) + \
-           "\n\Salidas: \n\t\t" + str(self.outputs)
+           "\n\tSalidas: \n\t\t" + str(self.outputs) + "\n\n"
 
   
   def change(self) -> dict():
