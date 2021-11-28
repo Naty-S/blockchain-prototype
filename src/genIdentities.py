@@ -26,7 +26,6 @@ def genIdentities(identities: int, nodos: int) -> Tuple[list[id.User], list[id.N
     port = -1 # TODO: por definir
     i = id.Nodo(nodo, privKey, publKey, address, port)
     nodes.append(i)
-  
 
   return (users, nodes)
 
