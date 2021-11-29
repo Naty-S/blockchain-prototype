@@ -40,11 +40,11 @@ class Blockchain():
 			newBlock = Block(transaction, self.chain[-1].hash)
 			newBlock.mineB(self.difficulty)
 			self.addToBlockchain(newBlock)
-			print('\n\n====================')
-			print('Hash:\t\t', newBlock.hash.hexdigest())
-			print('previousHash:\t\t', newBlock.previousHash.hexdigest())
-			print('Nonce:\t\t', newBlock.nonce)
-			print('Transaction:\t\t', newBlock.transactions)
+			#print('\n\n====================')
+			#print('Hash:\t\t', newBlock.hash.hexdigest())
+			#print('previousHash:\t\t', newBlock.previousHash.hexdigest())
+			#print('Nonce:\t\t', newBlock.nonce)
+			#print('Transaction:\t\t', newBlock.transactions)
 			
 		# funcion que consigue el nonce (mina, PoW)
 	def mineB(self, difficulty):		
