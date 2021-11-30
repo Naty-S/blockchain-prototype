@@ -11,28 +11,34 @@ def genIdentities(identities: int, nodos: int) -> Tuple[list[id.User], list[id.N
   nodes = []
 
   for x in range(identities):
+    
     privKey, publKey = __genKeys()
-    name = "user" + str(x)
-    mail = name + "@gmail.com"
-    address = btc.pubkey_to_address(publKey)
-    i = id.User(name, mail, privKey, publKey, address)
-    i.utxos.add(tx.Transaction(i, i))
-    users.append(i)
+    name             = "user" + str(x)
+    mail             = name + "@gmail.com"
+    address          = btc.pubkey_to_address(publKey)
+    coinbase         = tx.TxInput("0", 0, address).__dict__
+    user             = id.User(name, mail, privKey, publKey, address)
+    
+    user.utxos.append(tx.Transaction(user, user, 10000000, [coinbase]))
+    users.append(user)
 
   nPort = 5000
   for x in range(nodos):
+    
     privKey, publKey = __genKeys()
-    nodo = "nodo" + str(x)
-    address = btc.pubkey_to_address(publKey)
-    newPort = nPort + x
-    nPort = newPort
-    i = id.Nodo(nodo, privKey, publKey, address, newPort)
-    nodes.append(i)
+    name             = "nodo" + str(x)
+    address          = btc.pubkey_to_address(publKey)
+    newPort          = nPort + x
+    nPort            = newPort
+    node             = id.Nodo(name, privKey, publKey, address, newPort)
+    
+    nodes.append(node)
 
   return (users, nodes)
 
 
 def __genKeys() -> Tuple[str, str]:
+  
   privKey = btc.random_key()
   publKey = btc.privkey_to_pubkey(privKey)
 
