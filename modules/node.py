@@ -4,7 +4,7 @@ import modules.block       as block
 import modules.transaction as tx
 
 
-class Nodo:
+class Node:
 
   def __init__(self, name:str, port:int, neighbours: list[dict()]) -> None:
 
@@ -19,14 +19,12 @@ class Nodo:
     self.minerT           = threading.Thread(name=self.name+"-miner", target=self.miner)
 
     """ COMO ENVIAR MSJ ENTRE NODOS """
-    self.sock.bind((socket.gethostname(), 5100))
+    self.sock.bind((socket.gethostname(), self.port))
     self.netListenerT.start()
     self.minerT.start()
 
 
   def netListener(self):
-
-    print("netListener started...")
 
     # Presentarse
 
@@ -34,10 +32,7 @@ class Nodo:
 
     while True:
       c, addr = self.sock.accept()
-      
-      msg = c.recv(2048)
-      t   = ast.literal_eval(msg.decode())
-      print(t)
+      tx      = ast.literal_eval(c.recv(2048).decode())
 
 
       # if msg == 'Transacción Nueva' | 'Transacción'
@@ -63,9 +58,12 @@ class Nodo:
             # self.sock.send(b'No')
             # self.__writeLog("Bloque {b} recibido y rechazado {time}")
 
-
-      c.send(b'Thank you for connecting client')
+      ack = b'ack from: ' + str(self.name).encode()
+      c.send(ack)
       c.close()
+
+      # if ctrl + c : SystemExit()/ sys.exit()
+      # threading.Event()
 
 
   def __validateTx(self, t) -> bool:
@@ -91,8 +89,6 @@ class Nodo:
 
 
   def miner(self, abort: bool = False) -> block.Block:
-
-    print("Miner started...")
 
     while not abort:
 

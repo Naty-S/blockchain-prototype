@@ -12,6 +12,7 @@ class Transaction:
     self.inputs   = inputs
     self.outputs  = [TxOutput(satoshis, receiver.address, 0).__dict__]
 
+    # TODO: posiblemente inutil
     self.sender   = sender.address # la encripta con su pub key
     self.receiver = receiver.address
 

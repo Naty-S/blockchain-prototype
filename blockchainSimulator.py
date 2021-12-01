@@ -1,17 +1,15 @@
 import sys
 
 import config.variables    as vars
+import modules.node        as node
 import src.genIdentities   as genIds
 import src.genTransactions as genTxs
-import src.nodo            as node
 
 
-def blockchainSimulator(i: int = 2, n: int = 1, m: int = 0, d: str = "") -> None:
+def blockchainSimulator(i: int = 5, n: int = 3, m: int = 0, d: str = "") -> None:
   
   (users, nodes) = genIds.genIdentities(i, n)
   # genNetFile(n, m)
-  # genTransConfigFile()
-  # genBlockConfigFile()
   # init nodes, serian(pueden) threads?
   genTxs.genTransactions(users, nodes, "") # hacerlo thread?
 
@@ -22,9 +20,9 @@ def genNetFile(nodos: int, pares: int) -> None:
 
   #   outfile.write(nodos+'\n')
   #   n = 0
-  #   nodo
+  #   node
   #   while n < nodos:
-  #     outfile.write(nodo[n].name+' '+nodo[n].port+'\n')
+  #     outfile.write(node[n].name+' '+node[n].port+'\n')
   #     n += 1
 
   #   outfile.write(pares+'\n')
@@ -37,25 +35,3 @@ def genNetFile(nodos: int, pares: int) -> None:
   pass
 
 
-def genTransConfigFile() -> None:
-
-  with open(vars.TRANSACTION_COFIG_FILE, "w") as outfile:
-    """ 
-    - frecuencia (# transacciones/min)
-    - #InMax
-    - #InMin
-    - #OutMax
-    - #OutMin
-    """
-    pass
-
-
-def genBlockConfigFile() -> None:
-
-  with open(vars.BLOCK_COFIG_FILE, "w") as outfile:
-    """ 
-    - TamMaxBloque: 512               # en bytes
-    - TiempoPromedioCreacionBloque: 1 # en minutos
-    - DificultadInicial: 1000
-    """
-    pass

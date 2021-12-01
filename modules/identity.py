@@ -17,7 +17,7 @@ class User(Identity):
     self.utxos = []
     
 
-class Nodo(Identity):
+class Node(Identity):
 
   def __init__(self, name: str, privKey: str, publKey: str, address: str, port: int) -> None:
     super().__init__(name, privKey, publKey, address)

@@ -5,12 +5,12 @@ import modules.identity    as id
 import modules.transaction as tx
 
 
-def genIdentities(identities: int, nodos: int) -> Tuple[list[id.User], list[id.Nodo]]:
+def genIdentities(identities: int, nodos: int) -> Tuple[list[id.User], list[id.Node]]:
   
   users = []
   nodes = []
 
-  for x in range(identities):
+  for x in range(1,identities):
     
     privKey, publKey = __genKeys()
     name             = "user" + str(x)
@@ -22,15 +22,14 @@ def genIdentities(identities: int, nodos: int) -> Tuple[list[id.User], list[id.N
     user.utxos.append(tx.Transaction(user, user, 10000000, [coinbase]))
     users.append(user)
 
-  nPort = 5000
-  for x in range(nodos):
+  newPort = 5000
+  for x in range(1,nodos):
     
     privKey, publKey = __genKeys()
-    name             = "nodo" + str(x)
+    name             = "node" + str(x)
     address          = btc.pubkey_to_address(publKey)
-    newPort          = nPort + x
-    nPort            = newPort
-    node             = id.Nodo(name, privKey, publKey, address, newPort)
+    node             = id.Node(name, privKey, publKey, address, newPort)
+    newPort          += x
     
     nodes.append(node)
 
