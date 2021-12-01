@@ -1,9 +1,10 @@
 import random
+import re
 
 import modules.identity as id
 
 
-def genNetwork(nodes: list[id.Node], pairs: int) -> list[dict(str,int)]:
+def genNetwork(nodes: list[id.Node], pairs: int) -> list[dict[str,int]]:
 
   net = []
   totalPairs = 0
@@ -11,7 +12,9 @@ def genNetwork(nodes: list[id.Node], pairs: int) -> list[dict(str,int)]:
   while totalPairs < pairs:
     for n in nodes:
       auxNodes = nodes.copy()
-      neighbour = random.choice(auxNodes.remove(n))
+      auxNodes.remove(n)
+      neighbour = random.choice(auxNodes)
       net.append({ n.name : neighbour.port })
       totalPairs += 1
-
+  
+  return net
