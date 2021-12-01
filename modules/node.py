@@ -6,11 +6,11 @@ import modules.transaction as tx
 
 class Node:
 
-  def __init__(self, name:str, port:int, neighbours: list[dict()]) -> None:
+  def __init__(self, name:str, port:int, neighbours: list[int]) -> None:
 
     self.name             = name
     self.port             = port
-    self.neighbours       = neighbours # [{ n.name: n.port }]
+    self.neighbours       = neighbours # [port]
     self.sock             = socket.socket()
     self.txsPropagadas    = []
     self.blocksPropagados = []
@@ -34,8 +34,8 @@ class Node:
       c, addr = self.sock.accept()
       tx      = ast.literal_eval(c.recv(2048).decode())
 
-
-      # if msg == 'Transacción Nueva' | 'Transacción'
+      if tx.__contains__("Transaccion Nueva") | tx.__contains__("Transaccion"):
+        pass
         # if tx in self.txsPropagadas: continue
         # else:
           # if self.__validateTx(tx):

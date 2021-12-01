@@ -1,37 +1,26 @@
-import sys
+import random
 
-import config.variables    as vars
-import modules.node        as node
-import src.genIdentities   as genIds
-import src.genTransactions as genTxs
+import modules.identity as id
+import genIdenti        as genIds
+import genTransac       as genTxs
 
 
 def blockchainSimulator(i: int = 5, n: int = 3, m: int = 0, d: str = "") -> None:
   
   (users, nodes) = genIds.genIdentities(i, n)
-  # genNetFile(n, m)
-  # init nodes, serian(pueden) threads?
-  genTxs.genTransactions(users, nodes, "") # hacerlo thread?
+  net = genNetwork(n, m)
+  genTxs.genTransactions(users, list(nodes), "./output/logs/")
 
 
-def genNetFile(nodos: int, pares: int) -> None:
+def genNetwork(nodes: list[id.Node], pairs: int) -> list[dict(str,int)]:
 
-  # with open(vars.NET_FILE, "w") as outfile:
-
-  #   outfile.write(nodos+'\n')
-  #   n = 0
-  #   node
-  #   while n < nodos:
-  #     outfile.write(node[n].name+' '+node[n].port+'\n')
-  #     n += 1
-
-  #   outfile.write(pares+'\n')
-  #   m = 0
-  #   nodo1
-  #   nodo2
-  #   while m < pares:
-  #     outfile.write(nodo1[m].name+m+' '+nodo2[m].name+m+'\n')
-  #     m += 1
-  pass
-
+  net = []
+  totalPairs = 0
+  
+  while totalPairs < pairs:
+    for n in nodes:
+      auxNodes = nodes.copy()
+      neighbour = random.choice(auxNodes.remove(n))
+      net.append({ n.name : neighbour.port })
+      totalPairs += 1
 
