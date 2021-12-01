@@ -2,4 +2,7 @@
 class Block:
 
   def __init__(self, prevBlock) -> None:
-    pass
+
+    self.merkleRoot
+    self.transactions
+    self.prevBlock
