@@ -5,12 +5,12 @@ import modules.identity    as id
 import modules.transaction as tx
 
 
-def genIdentities(identities: int, nodos: int) -> Tuple[list[id.User], list[id.Node]]:
+def genIdentities(identities: int, nodos: int) -> Tuple[list[id.User], dict(str,id.Node)]:
   
   users = []
-  nodes = []
+  nodes = {}
 
-  for x in range(1,identities):
+  for x in range(1, identities):
     
     privKey, publKey = __genKeys()
     name             = "user" + str(x)
@@ -23,7 +23,7 @@ def genIdentities(identities: int, nodos: int) -> Tuple[list[id.User], list[id.N
     users.append(user)
 
   newPort = 5000
-  for x in range(1,nodos):
+  for x in range(1, nodos):
     
     privKey, publKey = __genKeys()
     name             = "node" + str(x)
@@ -31,7 +31,7 @@ def genIdentities(identities: int, nodos: int) -> Tuple[list[id.User], list[id.N
     node             = id.Node(name, privKey, publKey, address, newPort)
     newPort          += x
     
-    nodes.append(node)
+    nodes.update({name : node})
 
   return (users, nodes)
 
