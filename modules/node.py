@@ -73,11 +73,11 @@ class Node:
           self.__writeLog(f"[{time.asctime()}]: Transaction added to mempool: {txId}...\n")          
           self.__spread("Transaccion", tx)
           self.__spreadTxs.append(tx)
-          connex.send(ackSi)
+          connex.send(ackSi) # TODO: sing
           connex.close()
         else:
           self.__writeLog(f"[{time.asctime()}]: Transaction rejected: {txId}..\n.")
-          connex.send(ackNo)
+          connex.send(ackNo) # TODO: sing
           connex.close()
       else: # Se asume request == 'Bloque'
         b = msg[1]
@@ -95,11 +95,11 @@ class Node:
           self.__chain(b)
           self.__spread("Bloque", b)
           self.__spreadBlocks.append(b)
-          connex.send(ackSi)
+          connex.send(ackSi) # TODO: sing
           connex.close()
         else:
           self.__writeLog(f"[{time.asctime()}]: Block rejected: {bId}...\n")
-          connex.send(ackNo)
+          connex.send(ackNo) # TODO: sing
           connex.close()
       
       # Verify if miner mined a block
@@ -178,7 +178,7 @@ class Node:
       
       s = socket.socket()
       s.connect((b'localhost', neighbour))
-      s.send(msg)
+      s.send(msg) # TODO: sing
       # self.__writeLog(f"[{time.asctime()}]: Waiting ack...\n")
       # self.__writeLog(f"[{time.asctime()}]: Got ack: {s.recv(512).decode()}...\n")
       s.close()

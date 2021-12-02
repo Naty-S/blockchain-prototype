@@ -5,7 +5,7 @@ import modules.identity    as id
 import modules.transaction as tx
 
 
-def genIdentities(identities: int, nodos: int) -> Tuple[list[id.User], dict[str,id.Node]]:
+def genIdenti(identities: int, nodos: int) -> Tuple[list[id.User], dict[str,id.Node]]:
   
   users = []
   nodes = {}

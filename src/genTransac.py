@@ -6,7 +6,7 @@ import modules.identity    as id
 import modules.transaction as tx
 
 
-def genTransactions(users: list[id.User], nodes: list[id.Node], logDir: str) -> None:
+def genTransac(users: list[id.User], nodes: list[id.Node], logDir: str) -> None:
 
   logFile = logDir + "genTransac.log"
 
@@ -91,7 +91,7 @@ def __sendTx(t: tx.Transaction, node: id.Node, logFile: str) -> None:
   s.connect((b'localhost', node.port))
   __writeLog(logFile, f"[{time.asctime()}]: Conected to {node.port}...\n")
   
-  s.send(msg)
+  s.send(msg) # TODO: sing
   __writeLog(logFile, f"[{time.asctime()}]: Request sended to {node.name}...\n")
 
   __writeLog(logFile, f"[{time.asctime()}]: Waiting ack...\n")
