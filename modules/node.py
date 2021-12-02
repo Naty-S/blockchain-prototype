@@ -124,13 +124,17 @@ class Node:
 
     print("validateBlock...")
 
-    # b["prevBlock"] == self.__blockchain[-1]
-    pass
+    try:
+      b["prevBlock"] == self.__blockchain[-1].bId
+      return True
+    except:
+      return False
 
 
   def __chain(self, b: dict) -> None:
 
     bBlock = block.Block(b["bId"], b["prevBlock"], b["merkleRoot"], b["transactions"])
+    bBlock.timestamp = b["timestamp"]
     self.__blockchain.add(bBlock)
 
 
@@ -159,36 +163,35 @@ class Node:
 
     while True:
       print("mining...")
-      prevBlock  = self.__blockchain[-1]["bId"]
-      new_block  = block.Block("-1", prevBlock, "-1", [])
+      prevBlock  = self.__blockchain[-1].bId
+      newBlock   = block.Block("-1", prevBlock, "-1", [])
       merkleTree = pymerkle.MerkleTree()
 
       # Ask if have to abort mining
       while not self.__minerAbort.is_set():
 
         tx = self.__mempool.get(True)
-        new_block.transactions.append(tx)
-        new_block.size += len(tx) # Length of the hash id
+        newBlock.transactions.append(tx)
+        newBlock.size += len(tx) # Length of the hash id
         merkleTree.update(tx)
         self.__mempool.task_done()
 
         # Full block
-        if new_block.size == 512:
-          merkleRoot           = merkleTree.rootHash.decode()
-          blockHeader          = merkleRoot + prevBlock
-          blockHeaderHash      = hashlib.sha1(hashlib.sha1(blockHeader).hexdigest().encode()).hexdigest()
-          new_block.bId        = blockHeaderHash
-          new_block.merkleRoot = merkleRoot
-          self.__minedBlock.put(new_block.__dict__, True)
+        if newBlock.size == 512:
+          newBlock.timestamp  = time.asctime()
+          merkleRoot          = merkleTree.rootHash.decode()
+          blockHeader         = prevBlock + "nonce" + merkleRoot + str(newBlock.transactions) + newBlock.timestamp
+          newBlock.bId        = hashlib.sha1(hashlib.sha1(blockHeader).hexdigest().encode()).hexdigest()
+          newBlock.merkleRoot = merkleRoot
+          self.__minedBlock.put(newBlock.__dict__, True)
 
       # Reset to false
       self.__minerAbort.clear()
       
       # Return transacctions to mempool
-      for tx in new_block.transactions:
+      for tx in newBlock.transactions:
         self.__mempool.put(tx, True)
       
-
 
   def __writeLog(self, msg: str) -> None:
 

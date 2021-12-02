@@ -11,4 +11,5 @@ class Block:
     self.merkleRoot   = merkleRoot
     self.prevBlock    = prevBlock
     self.transactions = transactions
+    self.timestamp    = ""
     self.height       = -1 # TODO position in the chain, pueden tener la misma altura al competir(forks)
