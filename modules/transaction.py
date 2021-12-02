@@ -5,7 +5,7 @@ import modules.identity as id
 
 class Transaction:
 
-  def __init__(self, sender: id.User, receiver: id.User, satoshis: int, inputs: list) -> None:
+  def __init__(self, sender: id.User, receiver: id.User, satoshis: int, inputs: list[dict]) -> None:
     
     tx            = sender.address.encode() + receiver.address.encode()
     self.txId     = hashlib.sha1(hashlib.sha1(tx).hexdigest().encode()).hexdigest()
@@ -19,10 +19,11 @@ class Transaction:
 
 class TxInput(Transaction):
 
-  def __init__(self, prevTxId: str, prevTxOutIndex: int, address: str) -> None:
+  def __init__(self, prevTxId: str, prevTxOutIndex: int, value:int, address: str) -> None:
     self.prevTxId       = prevTxId
     self.prevTxOutIndex = prevTxOutIndex
     self.address        = address
+    self.value          = value
     self.scriptSig      = "" # TODO
 
 
