@@ -20,9 +20,9 @@ class Node:
     # [dict]: Blocks already spread
     self.__spreadBlocks = []  
     # [tx.__dict__]
-    self.__mempool      = queue.Queue(-1)
+    self.__mempool      = []
     # Block.__dict__
-    self.__minedBlock   = queue.Queue(1)
+    self.__minedBlock   = []
     # Shared blockchain
     self.__blockchain   = blockchain
     # TODO: List used when forks occurs
@@ -53,8 +53,8 @@ class Node:
       connex  = self.__socket.accept()[0]
       msg     = ast.literal_eval(connex.recv(8192).decode())
       request = msg[0]
-      ackSi   = request.encode() + b"ACK: " + self.__name.encode() + b": Si"
-      ackNo   = request.encode() + b"ACK: " + self.__name.encode() + b": No"
+      ackSi   = f"{request} ACK: {self.__name} : Si".encode()
+      ackNo   = f"{request} ACK: {self.__name} : No".encode()
       self.__writeLog(f"[{time.asctime()}]: Got request : {request}...\n")
 
       if (request == "Transaccion Nueva") | (request == "Transaccion"):
@@ -69,7 +69,7 @@ class Node:
         if self.__validateTx(tx):
           self.__writeLog(f"[{time.asctime()}]: Transaction accepted: {txId}...\n")
           self.__writeLog(f"[{time.asctime()}]: Adding transaction to mempool: {txId}...\n")
-          self.__mempool.put(tx, True)
+          self.__mempool.append(tx)
           self.__writeLog(f"[{time.asctime()}]: Transaction added to mempool: {txId}...\n")          
           self.__spread("Transaccion", tx)
           self.__spreadTxs.append(tx)
@@ -103,9 +103,9 @@ class Node:
           connex.close()
       
       # Verify if miner mined a block
-      if self.__minedBlock.qsize() != 0:
-        b = self.__minedBlock.get(True)
-        self.__writeLog(f"[{time.asctime()}]: Block mined: {bId}...\n")
+      if len(self.__minedBlock) != 0:
+        b = self.__minedBlock.pop()
+        self.__writeLog(f"[{time.asctime()}]: Block mined: {b['bId']}...\n")
         self.__spread("Bloque", b)
         self.__spreadBlocks.append(b)
         # Miner can start again
@@ -174,25 +174,26 @@ class Node:
 
     for neighbour in self.__neighbours:
       
-      self.__writeLog(f"[{time.asctime()}]: Sending to {neighbour}: {list(info.items())[0]}...\n")
+      self.__writeLog(f"[{time.asctime()}]: Sending to {neighbour}: {info}...\n")
       
       s = socket.socket()
       s.connect((b'localhost', neighbour))
       s.send(msg)
-      self.__writeLog(f"[{time.asctime()}]: Got ack: {s.recv(512).decode()}...\n")
+      # self.__writeLog(f"[{time.asctime()}]: Waiting ack...\n")
+      # self.__writeLog(f"[{time.asctime()}]: Got ack: {s.recv(512).decode()}...\n")
       s.close()
 
 
   # Filter mempool with transaction not in the winner block
   def __updateMempool(self, winner: dict) -> None:
 
-    self.__writeLog(f"[{time.asctime()}]: Updating mempool: {list(self.__mempool.queue)}...\n")
+    self.__writeLog(f"[{time.asctime()}]: Updating mempool: {self.__mempool}...\n")
 
-    txsNotInWinner = [ tx for tx in self.__mempool.queue if tx not in winner["transactions"] ]
-    self.__mempool = queue.Queue()
-    for tx in txsNotInWinner: self.__mempool.put(tx, True)
+    txsNotInWinner = [ tx for tx in self.__mempool if tx not in winner["transactions"] ]
+    self.__mempool = []
+    for tx in txsNotInWinner: self.__mempool.append(tx)
 
-    self.__writeLog(f"[{time.asctime()}]: mempool updated {list(self.__mempool.queue)}...\n")
+    self.__writeLog(f"[{time.asctime()}]: mempool updated {self.__mempool}...\n")
 
 
   def __miner(self) -> None:
@@ -207,27 +208,30 @@ class Node:
       # Ask if have to abort mining
       while not self.__minerAbort.is_set():
 
-        self.__writeLog(f"[{time.asctime()}]: Checking txs in mempool...\n")
+        if len(self.__mempool) != 0:
 
-        tx   = self.__mempool.get(True)
-        txId = tx["txId"]
-
-        self.__writeLog(f"[{time.asctime()}]: Adding transaction to new block: {txId}...\n")
-        newBlock.transactions.append(tx)
-        newBlock.size += len(txId) # Length of the tx id
-        
-        self.__writeLog(f"[{time.asctime()}]: Adding transaction to merkle tree: {txId}...\n")
-        merkleTree.update(txId.encode())
-        self.__mempool.task_done()
-
-        # Full block
-        if newBlock.size == 512:
+          self.__writeLog(f"[{time.asctime()}]: Checking txs in mempool...\n")
   
-          newBlock.timestamp  = time.asctime()
-          newBlock.merkleRoot = merkleTree.rootHash.decode()
-          self.__writeLog(f"[{time.asctime()}]: Proof of work...\n")
-          newBlock.pow()
-          self.__minedBlock.put(newBlock.__dict__, True)
+          tx   = self.__mempool.pop()
+          txId = tx["txId"]
+
+          self.__writeLog(f"[{time.asctime()}]: Adding transaction to new block: {txId}...\n")
+          newBlock.transactions.append(tx)
+          newBlock.size += len(txId) # Length of the tx id
+          
+          self.__writeLog(f"[{time.asctime()}]: Adding transaction to merkle tree: {txId}...\n")
+          merkleTree.update(txId.encode())
+          # self.__mempool.task_done()
+
+          # Full block
+          if (newBlock.size == 512):
+    
+            newBlock.timestamp  = time.asctime()
+            newBlock.merkleRoot = merkleTree.rootHash.decode()
+            self.__writeLog(f"[{time.asctime()}]: Executing Proof of work...\n")
+            newBlock.pow()
+            # newBlock.calcHash()
+            self.__minedBlock.append(newBlock.__dict__)
 
       # Reset to false, restart mining
       self.__writeLog(f"[{time.asctime()}]: Restarting mining...\n")
@@ -236,7 +240,7 @@ class Node:
       # Return transacctions to mempool
       self.__writeLog(f"[{time.asctime()}]: Returning transaccionts to mempool...\n")
       for tx in newBlock.transactions:
-        self.__mempool.put(tx, True)
+        self.__mempool.append(tx)
       
 
   def __writeLog(self, msg: str) -> None:
