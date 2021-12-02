@@ -1,7 +1,8 @@
-import ast, hashlib, pymerkle, queue, socket, threading, time, pdb
+import ast, pymerkle, queue, socket, threading, time, pdb
 
 import modules.block       as block
 import modules.blockchain  as bc
+import config.variables    as vars
 
 
 class Node:
@@ -16,7 +17,7 @@ class Node:
     self.__spreadTxs    = []  # [dict]
     self.__spreadBlocks = []  # [dict]
     self.__orphanBlocks = []  # [dict] TODO: forks
-    self.__mempool      = queue.Queue()  # [tx] - tx dict repr
+    self.__mempool      = queue.Queue()  # [tx.__dict__]
     self.__minedBlock   = queue.Queue(1) # Block.__dict__
     self.__blockchain   = bc  # Blockchain
     self.__netListenerT = threading.Thread(name=self.__name+"-netListener", target=self.__netListener)
@@ -124,8 +125,13 @@ class Node:
 
     print("validateBlock...")
 
+    txsMerkle = pymerkle.MerkleTree()
+    for tx in b["transactions"]: txsMerkle.update(tx["txId"])
+
     try:
       b["prevBlock"] == self.__blockchain[-1].bId
+      txsMerkle.rootHash.decode() == b["merkleRoot"]
+      int(b["bId"],16) < 2**(256-(vars.DIFFICULTY)/100) # Hash got correct pow
       return True
     except:
       return False
@@ -163,8 +169,7 @@ class Node:
 
     while True:
       print("mining...")
-      prevBlock  = self.__blockchain[-1].bId
-      newBlock   = block.Block("-1", prevBlock, "-1", [])
+      newBlock   = block.Block("-1", self.__blockchain[-1].bId, "-1", [])
       merkleTree = pymerkle.MerkleTree()
 
       # Ask if have to abort mining
@@ -174,7 +179,7 @@ class Node:
         txId = tx["txId"]
         newBlock.transactions.append(tx)
         newBlock.size += len(txId) # Length of the tx id
-        merkleTree.update(txId)
+        merkleTree.update(txId.encode())
         self.__mempool.task_done()
 
         # Full block

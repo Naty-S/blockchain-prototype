@@ -24,6 +24,6 @@ class Block:
 
   def pow(self):
 
-    while int(self.bId.hexdigest(), 16) > 2**(256 - (vars.DIFFICULTY/100)):
+    while int(self.bId, 16) > 2**(256 - (vars.DIFFICULTY/100)):
       self.nonce += 1
       self.__calcHash()
