@@ -16,7 +16,7 @@ def genTransactions(users: list[id.User], nodes: list[id.Node], logDir: str) -> 
 
   x = 0
   # while True:
-  while x < 9:
+  while x < 10:
     __writeLog(logFile, f"[{time.asctime()}]: Transaction: {x}...\n")
     node     = random.choice(nodes)
     sender   = random.choice(users)
@@ -61,9 +61,10 @@ def __genTx(sender: id.User, receiver: id.User, satoshis: int, logFile: str) -> 
         inputs.append(input)
         total_amount += out["value"]
   
-    if total_amount < satoshis:
-      newSatoshis = random.randint(1, 10000000) * random.random() + 1
-      __genTx(sender, sender, newSatoshis)
+    # if total_amount < satoshis:
+    #   total_amount = 0
+    #   newSatoshis = (random.randint(1, 1000000) * random.random() + 1)
+    #   __genTx(sender, sender, newSatoshis, logFile)
 
   new_tx = tx.Transaction(sender, receiver, satoshis, inputs)
   __writeLog(logFile, f"[{time.asctime()}]: Transaction created...\n")
