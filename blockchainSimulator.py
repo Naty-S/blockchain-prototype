@@ -8,7 +8,8 @@ import src.genTransac      as genTxs
 import src.genNet          as genNet
 import src.nodo            as nodo
 
-def blockchainSimulator(i: int = 5, n: int = 1, m: int = 0, outDir: str = "./output/logs/") -> None:
+
+def blockchainSimulator(i: int = 5, n: int = 3, m: int = 4, outDir: str = "./output/logs/") -> None:
   
   if not os.path.exists(outDir): os.makedirs(outDir)
   
@@ -21,11 +22,10 @@ def blockchainSimulator(i: int = 5, n: int = 1, m: int = 0, outDir: str = "./out
   #   subprocess.run(["cmd.exe", "/c", "start", f"{cmd}"])
   bc = blockchain.Blockchain()
   nodo.nodo("nodo0", nodes, net, outDir, bc)
-  # nodo.nodo("nodo1", nodes, net, outDir, genesis)
-  # nodo.nodo("nodo2", nodes, net, outDir, genesis)
-  # blockchain.Blockchain(vars.DIFFICULTY, list(nodes.values())) # Creates genesis block and spread to network
-  # print(f"threads: {threading.enumerate()}")
+  nodo.nodo("nodo1", nodes, net, outDir, bc)
+  nodo.nodo("nodo2", nodes, net, outDir, bc)
   genTxs.genTransactions(users, list(nodes.values()), outDir)
+  print(f"Blockchain:\n{bc.getChain()}")
 
 
 blockchainSimulator()
