@@ -11,7 +11,8 @@ class Blockchain:
 
 
   def __genGensisBlock(self) -> None:
-    pass
+
+    self.__chain.append(block.Block("-1", "-1", []))
 
 
   def getChain(self) -> list: return self.__chain
@@ -20,9 +21,33 @@ class Blockchain:
   def add(self, b: block.Block) -> None: self.__chain.append(b)
 
 
-  def blockExplorer(self) -> block.Block:
-    pass
+  def blockExplorer(self, flag: str, value: str) -> None:
+    
+    # get from hash
+    if flag == '-h':
+      found = False
+      for i in range(len(self.__chain)):
+        if value == self.__chain[i].bId:
+          print(f"Bloque {value}:\n{self.__chain[i]}")
+          found = True
+
+      if not found: print(f"Bloque {value} no encontrado")
+
+    # get from height
+    elif flag == '-a':
+      if -1 < int(value) < len(self.__chain):
+        print(f"Bloque de altura {value}:\n{self.__chain[value]}")
+      else:
+        print(f"Altura {value} no valida")
 
 
-  def txExplorer(self) -> tx.Transaction:
-    pass
+  def txExplorer(self, flag: str, hash: str) -> None:
+    
+    found = False
+    for b in self.__chain:
+      for tx in b.transactions:
+        if hash == tx["txId"]:
+          print(f"Transaccion {hash}:\n{tx}")
+          found = True
+
+    if not found: print(f"Transaccion {hash} no encontrada")

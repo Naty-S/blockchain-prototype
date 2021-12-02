@@ -1,5 +1,5 @@
 # Transactions config vars
-FREQUENCY   = 3
+FREQUENCY   = 8
 MIN_INPUTS  = 1
 MAX_INPUTS  = 4
 MIN_OUTPUTS = 1
