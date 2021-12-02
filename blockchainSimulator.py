@@ -25,7 +25,7 @@ def blockchainSimulator(i: int = 5, n: int = 3, m: int = 4, outDir: str = "./out
   nodo.nodo("nodo1", nodes, net, outDir, bc)
   nodo.nodo("nodo2", nodes, net, outDir, bc)
   genTxs.genTransactions(users, list(nodes.values()), outDir)
-  print(f"Blockchain:\n{bc.getChain()}")
+  print(f"Blockchain:\n{[b.bId for b in bc.getChain()]}")
 
 
 blockchainSimulator()
