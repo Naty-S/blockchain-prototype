@@ -11,7 +11,8 @@ class Blockchain:
 
 
   def __genGensisBlock(self) -> None:
-    pass
+
+    self.__chain.append(block.Block("-1", "-1", "-1", []))
 
 
   def getChain(self) -> list: return self.__chain
