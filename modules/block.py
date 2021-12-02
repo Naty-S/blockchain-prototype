@@ -14,14 +14,14 @@ class Block:
     self.prevBlock    = prevBlock
     self.transactions = transactions
     self.timestamp    = ""
-    header   = str(self.prevBlock) + str(self.nonce) + self.timestamp + str(self.transactions)
+    header   = str(self.prevBlock) + str(self.merkleRoot) + str(self.nonce) + self.timestamp + str(self.transactions)
     self.bId = hashlib.sha256(hashlib.sha256(header.encode()).hexdigest().encode()).hexdigest()
     self.height       = -1 # TODO position in the chain, pueden tener la misma altura al competir(forks)
 
 
   def calcHash(self):
     
-    header   = str(self.prevBlock) + str(self.nonce) + self.timestamp + str(self.transactions)
+    header   = str(self.prevBlock) + str(self.merkleRoot) + str(self.nonce) + self.timestamp + str(self.transactions)
     self.bId = hashlib.sha256(hashlib.sha256(header.encode()).hexdigest().encode()).hexdigest()
     
 
