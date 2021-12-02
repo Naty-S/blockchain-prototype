@@ -16,7 +16,7 @@ class Node:
     self.__spreadTxs    = []  # [dict]
     self.__spreadBlocks = []  # [dict]
     self.__orphanBlocks = []  # [dict] TODO: forks
-    self.__mempool      = queue.Queue()  # [str] - blocks hashes
+    self.__mempool      = queue.Queue()  # [tx] - tx dict repr
     self.__minedBlock   = queue.Queue(1) # Block.__dict__
     self.__blockchain   = bc  # Blockchain
     self.__netListenerT = threading.Thread(name=self.__name+"-netListener", target=self.__netListener)
@@ -50,7 +50,7 @@ class Node:
 
         txId = tx["txId"]
         if self.__validateTx(tx):
-          self.__mempool.put(txId, True)
+          self.__mempool.put(tx, True)
           self.__spread("Transaccion", tx)
           self.__spreadTxs.append(tx)
           self.__writeLog("Transaccion >"+txId+"< recibida y aceptada: ["+time.asctime()+"]\n")
@@ -151,7 +151,7 @@ class Node:
 
 
   # Filter mempool with transaction not in the winner block
-  def __updateMempool(self, winner: str) -> None:
+  def __updateMempool(self, winner: dict) -> None:
 
     print("updateMempool...")
     txsNotInWinner = [ tx for tx in self.__mempool.queue if tx not in winner["transactions"] ]
@@ -170,19 +170,18 @@ class Node:
       # Ask if have to abort mining
       while not self.__minerAbort.is_set():
 
-        tx = self.__mempool.get(True)
+        tx   = self.__mempool.get(True)
+        txId = tx["txId"]
         newBlock.transactions.append(tx)
-        newBlock.size += len(tx) # Length of the hash id
-        merkleTree.update(tx)
+        newBlock.size += len(txId) # Length of the tx id
+        merkleTree.update(txId)
         self.__mempool.task_done()
 
         # Full block
         if newBlock.size == 512:
           newBlock.timestamp  = time.asctime()
-          merkleRoot          = merkleTree.rootHash.decode()
-          blockHeader         = prevBlock + "nonce" + merkleRoot + str(newBlock.transactions) + newBlock.timestamp
-          newBlock.bId        = hashlib.sha1(hashlib.sha1(blockHeader).hexdigest().encode()).hexdigest()
-          newBlock.merkleRoot = merkleRoot
+          newBlock.merkleRoot = merkleTree.rootHash.decode()
+          newBlock.pow()
           self.__minedBlock.put(newBlock.__dict__, True)
 
       # Reset to false

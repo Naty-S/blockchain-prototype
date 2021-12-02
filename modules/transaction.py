@@ -8,7 +8,7 @@ class Transaction:
   def __init__(self, sender: id.User, receiver: id.User, satoshis: int, inputs: list[dict]) -> None:
     
     tx            = sender.address.encode() + receiver.address.encode()
-    self.txId     = hashlib.sha1(hashlib.sha1(tx).hexdigest().encode()).hexdigest()
+    self.txId     = hashlib.sha256(hashlib.sha256(tx).hexdigest().encode()).hexdigest()
     self.inputs   = inputs
     self.outputs  = [TxOutput(satoshis, receiver.address, 0).__dict__]
 
