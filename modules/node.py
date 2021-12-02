@@ -25,7 +25,7 @@ class Node:
     self.__minedBlock   = queue.Queue(1)
     # Shared blockchain
     self.__blockchain   = blockchain
-    # TODO: List used whe forks occurs
+    # TODO: List used when forks occurs
     self.__myBlockchain = []
     # [dict] TODO
     self.__orphanBlocks = []
@@ -36,7 +36,7 @@ class Node:
 
     # Clear last sesion
     with open(self.__logFile, "w+") as file:
-      file.write(f"[{time.asctime()}]: Starting Node: {self.__name}...")
+      file.write(f"[{time.asctime()}]: Starting Node: {self.__name}...\n")
 
     self.__socket.bind((b'localhost', self.__port))
     self.__netListenerT.start()
@@ -55,62 +55,58 @@ class Node:
       request = msg[0]
       ackSi   = request.encode() + b"ACK: " + self.__name.encode() + b": Si"
       ackNo   = request.encode() + b"ACK: " + self.__name.encode() + b": No"
-      print(f"{self.__name}: Got request : {request}...")
+      self.__writeLog(f"[{time.asctime()}]: Got request : {request}...\n")
 
       if (request == "Transaccion Nueva") | (request == "Transaccion"):
         
-        tx = msg[1]
-        
+        tx   = msg[1]
+        txId = tx["txId"]
+        self.__writeLog(f"[{time.asctime()}]: Transaction received: {txId}...\n")
+
         if tx in self.__spreadTxs:
           continue
 
-        txId = tx["txId"]
         if self.__validateTx(tx):
-
-          print(f"{self.__name}: Adding {txId} to mempool...")
+          self.__writeLog(f"[{time.asctime()}]: Transaction accepted: {txId}...\n")
+          self.__writeLog(f"[{time.asctime()}]: Adding transaction to mempool: {txId}...\n")
           self.__mempool.put(tx, True)
-          
+          self.__writeLog(f"[{time.asctime()}]: Transaction added to mempool: {txId}...\n")          
           self.__spread("Transaccion", tx)
-          self.__writeLog("Transaccion >"+txId+"< recibida y aceptada: ["+time.asctime()+"]\n")
           self.__spreadTxs.append(tx)
           connex.send(ackSi)
           connex.close()
         else:
-          print(f"{self.__name}: Transaction {txId} rejected...")
-
-          self.__writeLog("Transaccion <"+txId+"> recibida y rechazada: ["+time.asctime()+"]\n")
+          self.__writeLog(f"[{time.asctime()}]: Transaction rejected: {txId}..\n.")
           connex.send(ackNo)
           connex.close()
       else: # Se asume request == 'Bloque'
         b = msg[1]
-        
+        bId = b["bId"]
+        self.__writeLog(f"[{time.asctime()}]: Block received: {bId}...\n")
+
         if b in self.__spreadBlocks:
           continue
 
         if self.__validateBlock(b):
-          print(f"{self.__name}: Aborting minig...")
+          self.__writeLog(f"[{time.asctime()}]: Block accepted: {bId}...\n")
+          self.__writeLog(f"[{time.asctime()}]: Aborting mining...\n")
           self.__minerAbort.set()
           self.__updateMempool(b)
           self.__chain(b)
           self.__spread("Bloque", b)
-          self.__writeLog("Bloque >"+b["bId"]+"< recibido y aceptado: ["+time.asctime()+"]\n")
           self.__spreadBlocks.append(b)
           connex.send(ackSi)
           connex.close()
         else:
-          print(f"{self.__name}: Block {b['bId']} rejected...")
-
-          self.__writeLog("Bloque <"+b["bId"]+"> recibido y rechazado: ["+time.asctime()+"]\n")
+          self.__writeLog(f"[{time.asctime()}]: Block rejected: {bId}...\n")
           connex.send(ackNo)
           connex.close()
       
       # Verify if miner mined a block
       if self.__minedBlock.qsize() != 0:
-        
         b = self.__minedBlock.get(True)
-        print(f"{self.__name}: Block mined: {b['bId']}...")
+        self.__writeLog(f"[{time.asctime()}]: Block mined: {bId}...\n")
         self.__spread("Bloque", b)
-        self.__writeLog("Bloque >"+b["bId"]+"< minado y propagado: ["+time.asctime()+"]")
         self.__spreadBlocks.append(b)
         # Miner can start again
         self.__minerAbort.clear()
@@ -118,7 +114,7 @@ class Node:
 
   def __validateTx(self, tx: dict) -> bool:
 
-    print(f"{self.__name}: Validating Tx: {tx['txId']}...")
+    self.__writeLog(f"[{time.asctime()}]: Validating Transaction: {tx['txId']}...\n")
 
     try:
       tx["inputs"]
@@ -145,7 +141,7 @@ class Node:
 
   def __validateBlock(self, b: dict) -> bool:
 
-    print(f"{self.__name}: Validating Block: {b['bId']}...")
+    self.__writeLog(f"[{time.asctime()}]: Validating Block: {b['bId']}...\n")
 
     txsMerkle = pymerkle.MerkleTree()
     for tx in b["transactions"]:
@@ -163,7 +159,7 @@ class Node:
 
   def __chain(self, b: dict) -> None:
 
-    print(f"{self.__name}: Adding block to blockchain: {b['bId']}...")
+    self.__writeLog(f"[{time.asctime()}]: Adding block to blockchain: {b['bId']}...\n")
 
     bBlock           = block.Block(b["prevBlock"], b["merkleRoot"], b["transactions"])
     bBlock.bId       = b["bId"]
@@ -173,37 +169,37 @@ class Node:
 
   def __spread(self, request: str, info: dict) -> None:
 
-    print(f"{self.__name}: Spreading...")
+    self.__writeLog(f"[{time.asctime()}]: Spreading...\n")
     msg = str((request, info)).encode()
 
     for neighbour in self.__neighbours:
       
-      print(f"{self.__name}: Sending to {neighbour}: {list(info.items())[0]}...")
+      self.__writeLog(f"[{time.asctime()}]: Sending to {neighbour}: {list(info.items())[0]}...\n")
       
       s = socket.socket()
       s.connect((b'localhost', neighbour))
       s.send(msg)
-      print(f"\t{self.__name}: Got ack : {s.recv(512).decode()}")
+      self.__writeLog(f"[{time.asctime()}]: Got ack: {s.recv(512).decode()}...\n")
       s.close()
 
 
   # Filter mempool with transaction not in the winner block
   def __updateMempool(self, winner: dict) -> None:
 
-    print(f"{self.__name}: Updating mempool: {self.__mempool.queue}...")
+    self.__writeLog(f"[{time.asctime()}]: Updating mempool: {list(self.__mempool.queue)}...\n")
 
     txsNotInWinner = [ tx for tx in self.__mempool.queue if tx not in winner["transactions"] ]
     self.__mempool = queue.Queue()
     for tx in txsNotInWinner: self.__mempool.put(tx, True)
 
-    print(f"{self.__name}: mempool updated {self.__mempool.queue}...")
+    self.__writeLog(f"[{time.asctime()}]: mempool updated {list(self.__mempool.queue)}...\n")
 
 
   def __miner(self) -> None:
 
     while True:
 
-      print(f"{self.__name}: Started mining...")
+      self.__writeLog(f"[{time.asctime()}]: Mining started...\n")
       
       newBlock   = block.Block(self.__blockchain.getChain()[-1].bId, "-1", [])
       merkleTree = pymerkle.MerkleTree()
@@ -211,14 +207,16 @@ class Node:
       # Ask if have to abort mining
       while not self.__minerAbort.is_set():
 
-        print(f"{self.__name}: Checking txs in mempool...")
+        self.__writeLog(f"[{time.asctime()}]: Checking txs in mempool...\n")
 
         tx   = self.__mempool.get(True)
         txId = tx["txId"]
-        print(f"{self.__name}: Adding tx {txId} to new block...")
+
+        self.__writeLog(f"[{time.asctime()}]: Adding transaction to new block: {txId}...\n")
         newBlock.transactions.append(tx)
         newBlock.size += len(txId) # Length of the tx id
-        print(f"{self.__name}: Adding tx {txId} to merkle tree...")
+        
+        self.__writeLog(f"[{time.asctime()}]: Adding transaction to merkle tree: {txId}...\n")
         merkleTree.update(txId.encode())
         self.__mempool.task_done()
 
@@ -227,21 +225,21 @@ class Node:
   
           newBlock.timestamp  = time.asctime()
           newBlock.merkleRoot = merkleTree.rootHash.decode()
-          print(f"{self.__name}: Proof of work...")
+          self.__writeLog(f"[{time.asctime()}]: Proof of work...\n")
           newBlock.pow()
           self.__minedBlock.put(newBlock.__dict__, True)
 
       # Reset to false, restart mining
-      print(f"{self.__name}: Restarting mining...")
+      self.__writeLog(f"[{time.asctime()}]: Restarting mining...\n")
       self.__minerAbort.clear()
       
       # Return transacctions to mempool
-      print(f"{self.__name}: Returning transaccionts to mempool...")
+      self.__writeLog(f"[{time.asctime()}]: Returning transaccionts to mempool...\n")
       for tx in newBlock.transactions:
         self.__mempool.put(tx, True)
       
 
   def __writeLog(self, msg: str) -> None:
 
-    print(f"{self.__name}: Writing in log file...")
-    with open(self.__logFile, "a") as logFile: logFile.write(msg)
+    with open(self.__logFile, "a") as logFile:
+      logFile.write(msg)
