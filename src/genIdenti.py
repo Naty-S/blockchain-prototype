@@ -16,7 +16,7 @@ def genIdentities(identities: int, nodos: int) -> Tuple[list[id.User], dict[str,
     name             = "user" + str(x)
     mail             = name + "@gmail.com"
     address          = btc.pubkey_to_address(publKey)
-    coinbase         = tx.TxInput("0", 0, address).__dict__
+    coinbase         = tx.TxInput("0", 0, 10000000, address).__dict__
     user             = id.User(name, mail, privKey, publKey, address)
     
     user.utxos.append(tx.Transaction(user, user, 10000000, [coinbase]))
