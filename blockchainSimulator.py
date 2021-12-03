@@ -1,10 +1,12 @@
 import os
 
-import modules.blockchain  as blockchain
-import src.genIdenti       as genIds
-import src.genTransac      as genTxs
-import src.genNet          as genNet
-import src.nodo            as nodo
+import modules.blockchain    as blockchain
+import modules.logVisualizer as logV
+import src.genIdenti         as genIds
+import src.genTransac        as genTxs
+import src.genNet            as genNet
+import src.nodo              as nodo
+
 
 
 def blockchainSimulator(i: int = 5, n: int = 3, m: int = 4, outDir: str = "./output/logs/") -> None:
@@ -20,7 +22,10 @@ def blockchainSimulator(i: int = 5, n: int = 3, m: int = 4, outDir: str = "./out
   nodo.nodo("nodo2", nodes, net, outDir, bc)
   genTxs.genTransac(users, nodes, outDir)
   print(f"Blockchain:\n{[b.bId for b in bc.getChain()]}")
-  print(f"Block height = 3: {bc.blockExplorer('-a', 3)}")
+  print(f"Block height = 3:")
+  bc.blockExplorer('-a', 3)
+  logV.logVisualizer(outDir, "-mg")
+
 
 
 blockchainSimulator()
