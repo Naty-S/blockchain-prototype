@@ -87,7 +87,7 @@ def __sendTx(t: tx.Transaction, node: id.Node, logFile: str) -> None:
   
   s      = socket.socket()
   txDict = t.__dict__
-  msg    = str(("Transacción Nueva", txDict)).encode()
+  msg    = str(("Transaccion Nueva", txDict)).encode()
 
   s.connect((b'localhost', node.port))
   __writeLog(logFile, f"[{time.asctime()}]: Connected: {node.port}...\n")

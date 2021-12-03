@@ -59,7 +59,7 @@ class Node:
       ackNo   = f"{request} ACK: {self.__name} : No".encode()
       self.__writeLog(f"[{time.asctime()}]: Got request: {request}...\n")
 
-      if (request == "Transacción Nueva") | (request == "Transacción"):
+      if (request == "Transaccion Nueva") | (request == "Transaccion"):
         
         tx   = msg[1]
         txId = tx["txId"]
@@ -74,7 +74,7 @@ class Node:
           self.__writeLog(f"[{time.asctime()}]: Adding transaction to mempool: {txId}...\n")
           self.__mempool.append(tx)
           self.__writeLog(f"[{time.asctime()}]: Transaction added to mempool: {txId}...\n")          
-          self.__spread("Transacción", tx)
+          self.__spread("Transaccion", tx)
           self.__spreadTxs.append(tx)
           connex.send(ackSi) # TODO: Encrypt
           connex.close()
