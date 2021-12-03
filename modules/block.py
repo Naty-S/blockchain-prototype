@@ -27,6 +27,6 @@ class Block:
   # Proof of Work
   def pow(self):
 
-    while int(self.bId, 16) > 2**(256 - (vars.DIFFICULTY/100)):
+    while int(self.bId, 16) > 2**(256 - (vars.INIT_DIFFICULTY / 100)):
       self.nonce += 1
       self.calcHash()

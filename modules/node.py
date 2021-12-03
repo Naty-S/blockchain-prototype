@@ -1,5 +1,4 @@
-import ast, pymerkle, queue, socket, threading, time, pdb
-from typing import Tuple
+import ast, pymerkle, socket, threading, time
 
 import config.variables    as vars
 import modules.block       as block
@@ -164,7 +163,7 @@ class Node:
       b["prevBlock"] == self.__blockchain.getChain()[-1].bId
       txsMerkle.rootHash.decode() == b["merkleRoot"]
       # Verify Proof of Work
-      int(b["bId"], 16) < 2**(256 - (vars.DIFFICULTY / 100))
+      int(b["bId"], 16) < 2**(256 - (vars.INIT_DIFFICULTY / 100))
       return True
     except:
       return False
