@@ -1,4 +1,3 @@
-
 import hashlib
 
 import config.variables    as vars
@@ -25,8 +24,9 @@ class Block:
     self.bId = hashlib.sha256(hashlib.sha256(header.encode()).hexdigest().encode()).hexdigest()
     
 
+  # Proof of Work
   def pow(self):
 
-    while int(self.bId, 16) > 2**(256 - (vars.DIFFICULTY/100)):
+    while int(self.bId, 16) > 2**(256 - (vars.INIT_DIFFICULTY / 100)):
       self.nonce += 1
       self.calcHash()

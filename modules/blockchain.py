@@ -15,10 +15,14 @@ class Blockchain:
     self.__chain.append(block.Block("-1", "-1", []))
 
 
-  def getChain(self) -> list: return self.__chain
+  def getChain(self) -> list:
+    
+    return self.__chain
 
 
-  def add(self, b: block.Block) -> None: self.__chain.append(b)
+  def add(self, b: block.Block) -> None:
+    
+    self.__chain.append(b)
 
 
   def blockExplorer(self, flag: str, value: str) -> None:
@@ -38,16 +42,21 @@ class Blockchain:
       if -1 < int(value) < len(self.__chain):
         print(f"Bloque de altura {value}:\n{self.__chain[value]}")
       else:
-        print(f"Altura {value} no valida")
+        print(f"Altura {value} invalida")
+    else:
+      print("Solo se permite buscar por altura (-a) o(exclusivo) hash (-h)")
 
 
   def txExplorer(self, flag: str, hash: str) -> None:
     
-    found = False
-    for b in self.__chain:
-      for tx in b.transactions:
-        if hash == tx["txId"]:
-          print(f"Transaccion {hash}:\n{tx}")
-          found = True
+    if flag == "-h":
+      found = False
+      for b in self.__chain:
+        for tx in b.transactions:
+          if hash == tx["txId"]:
+            print(f"Transaccion {hash}:\n{tx}")
+            found = True
 
-    if not found: print(f"Transaccion {hash} no encontrada")
+      if not found: print(f"Transaccion {hash} no encontrada")
+    else:
+      print("Solo se permite buscar hash (-h)")

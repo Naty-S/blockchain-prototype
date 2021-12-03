@@ -4,14 +4,15 @@ from typing import Tuple
 import modules.identity as id
 
 
-def genNetwork(nodes: list[id.Node], pairs: int) -> list[Tuple[str,int]]:
+def genNetwork(nodes: dict[str,id.Node], pairs: int) -> list[Tuple[str,int]]:
 
-  net = []
+  nodesL     = list(nodes.values())
+  net        = []
   totalPairs = 0
   
   while totalPairs < pairs:
-    for n in nodes:
-      auxNodes = nodes.copy()
+    for n in nodesL:
+      auxNodes = nodesL.copy()
       auxNodes.remove(n)
       neighbour = random.choice(auxNodes)
       net.append( (n.name, neighbour.port) )
