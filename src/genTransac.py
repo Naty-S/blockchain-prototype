@@ -16,8 +16,7 @@ def genTransac(users: list[id.User], nodes: dict[str,id.Node], logDir: str) -> N
     file.write(f"[{time.asctime()}]: Starting to generate transactions...\n")
 
   x = 0
-  # while True:
-  while x < 3:
+  while True:
     __writeLog(logFile, f"[{time.asctime()}]: Generating transaction: {x}...\n")
     sender   = random.choice(users)
     receiver = random.choice(users)

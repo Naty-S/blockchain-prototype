@@ -8,6 +8,7 @@ import src.genNet            as genNet
 import src.nodo              as nodo
 
 
+
 def blockchainSimulator(i: int = 5, n: int = 3, m: int = 4, outDir: str = "./output/logs/") -> None:
   
   if not os.path.exists(outDir):
@@ -24,6 +25,7 @@ def blockchainSimulator(i: int = 5, n: int = 3, m: int = 4, outDir: str = "./out
   print(f"Block height = 3:")
   bc.blockExplorer('-a', 3)
   logV.logVisualizer(outDir, "-mg")
+
 
 
 blockchainSimulator()
