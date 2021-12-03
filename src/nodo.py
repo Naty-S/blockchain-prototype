@@ -9,4 +9,4 @@ def nodo(name: str, nodes: dict[str,id.Node], net: list[Tuple[str,int]], logDir:
   
   nodo       = nodes[name]
   neighbours = [ c[1] for c in net if c.__contains__(nodo.name) ]
-  node.Node(nodo.name, nodo.port, neighbours, logDir, bc)
+  node.Node(nodo, neighbours, logDir, bc)

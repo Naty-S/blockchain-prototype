@@ -1,17 +1,20 @@
 import ast, pymerkle, queue, socket, threading, time, pdb
 from typing import Tuple
 
+import config.variables    as vars
 import modules.block       as block
 import modules.blockchain  as bc
-import config.variables    as vars
+import modules.identity    as id
 
 
 class Node:
 
-  def __init__(self, name: str, port: int, neighbours: list[int], logDir: str, blockchain: bc.Blockchain) -> None:
+  def __init__(self, node: id.Node, neighbours: list[int], logDir: str, blockchain: bc.Blockchain) -> None:
 
-    self.__name         = name
-    self.__port         = port
+    self.__name         = node.name
+    self.__port         = node.port
+    self.__privKey      = node.privKey
+    self.__publKey      = node.publKey
     self.__logFile      = logDir + self.__name + ".log"
     # [int]: Neighbours ports
     self.__neighbours   = neighbours
@@ -45,7 +48,7 @@ class Node:
 
   def __netListener(self) -> None:
 
-    # TODO: Presentarse a sus vecinos
+    # TODO: Introduce to neighbours
 
     self.__socket.listen(5)
 
@@ -55,14 +58,15 @@ class Node:
       request = msg[0]
       ackSi   = f"{request} ACK: {self.__name} : Si".encode()
       ackNo   = f"{request} ACK: {self.__name} : No".encode()
-      self.__writeLog(f"[{time.asctime()}]: Got request : {request}...\n")
+      self.__writeLog(f"[{time.asctime()}]: Got request: {request}...\n")
 
-      if (request == "Transaccion Nueva") | (request == "Transaccion"):
+      if (request == "Transacción Nueva") | (request == "Transacción"):
         
         tx   = msg[1]
         txId = tx["txId"]
         self.__writeLog(f"[{time.asctime()}]: Transaction received: {txId}...\n")
 
+        # Check if already spreaded
         if tx in self.__spreadTxs:
           continue
 
@@ -71,19 +75,20 @@ class Node:
           self.__writeLog(f"[{time.asctime()}]: Adding transaction to mempool: {txId}...\n")
           self.__mempool.append(tx)
           self.__writeLog(f"[{time.asctime()}]: Transaction added to mempool: {txId}...\n")          
-          self.__spread("Transaccion", tx)
+          self.__spread("Transacción", tx)
           self.__spreadTxs.append(tx)
-          connex.send(ackSi) # TODO: sing
+          connex.send(ackSi) # TODO: Encrypt
           connex.close()
         else:
           self.__writeLog(f"[{time.asctime()}]: Transaction rejected: {txId}..\n.")
-          connex.send(ackNo) # TODO: sing
+          connex.send(ackNo) # TODO: Encrypt
           connex.close()
-      else: # Se asume request == 'Bloque'
+      elif request == "Bloque":
         b = msg[1]
         bId = b["bId"]
         self.__writeLog(f"[{time.asctime()}]: Block received: {bId}...\n")
 
+        # Check if already spreaded
         if b in self.__spreadBlocks:
           continue
 
@@ -95,12 +100,14 @@ class Node:
           self.__chain(b)
           self.__spread("Bloque", b)
           self.__spreadBlocks.append(b)
-          connex.send(ackSi) # TODO: sing
+          connex.send(ackSi) # TODO: Encrypt
           connex.close()
         else:
           self.__writeLog(f"[{time.asctime()}]: Block rejected: {bId}...\n")
-          connex.send(ackNo) # TODO: sing
+          connex.send(ackNo) # TODO: Encrypt
           connex.close()
+      else: # request == "Presentacion"
+        pass # TODO
       
       # Verify if miner mined a block
       if len(self.__minedBlock) != 0:
@@ -122,7 +129,7 @@ class Node:
     except:
       return False
     else:
-      # TODO: verificar scripts P2SH
+      # TODO: Verify scripts P2SH
       # TODO: inputsScripts  = [ i["scriptSig"] for i in tx["inputs"] ]
       # TODO: outsScripts = [ o["scriptPubKey"] for o in tx["outputs"] ]
 
@@ -137,6 +144,12 @@ class Node:
         return False
       else:
         return True
+
+
+  def __checkScript(self, script) -> bool:
+
+    # TODO
+    pass
     
 
   def __validateBlock(self, b: dict) -> bool:
@@ -178,7 +191,8 @@ class Node:
       
       s = socket.socket()
       s.connect((b'localhost', neighbour))
-      s.send(msg) # TODO: sing
+      s.send(msg) # TODO: Encrypt
+      # BUG: Infinit loop/wait
       # self.__writeLog(f"[{time.asctime()}]: Waiting ack...\n")
       # self.__writeLog(f"[{time.asctime()}]: Got ack: {s.recv(512).decode()}...\n")
       s.close()
@@ -191,9 +205,11 @@ class Node:
 
     txsNotInWinner = [ tx for tx in self.__mempool if tx not in winner["transactions"] ]
     self.__mempool = []
-    for tx in txsNotInWinner: self.__mempool.append(tx)
 
-    self.__writeLog(f"[{time.asctime()}]: mempool updated {self.__mempool}...\n")
+    for tx in txsNotInWinner:
+      self.__mempool.append(tx)
+
+    self.__writeLog(f"[{time.asctime()}]: Mempool updated: {self.__mempool}...\n")
 
 
   def __miner(self) -> None:
@@ -210,27 +226,26 @@ class Node:
 
         if len(self.__mempool) != 0:
 
-          self.__writeLog(f"[{time.asctime()}]: Checking txs in mempool...\n")
+          self.__writeLog(f"[{time.asctime()}]: Checking transactions in mempool...\n")
   
           tx   = self.__mempool.pop()
           txId = tx["txId"]
 
           self.__writeLog(f"[{time.asctime()}]: Adding transaction to new block: {txId}...\n")
           newBlock.transactions.append(tx)
-          newBlock.size += len(txId) # Length of the tx id
+          newBlock.size += len(txId)
           
           self.__writeLog(f"[{time.asctime()}]: Adding transaction to merkle tree: {txId}...\n")
           merkleTree.update(txId.encode())
-          # self.__mempool.task_done()
 
           # Full block
-          if (newBlock.size == 512):
+          if (newBlock.size == vars.BLOCK_MAX_SIZE):
     
             newBlock.timestamp  = time.asctime()
             newBlock.merkleRoot = merkleTree.rootHash.decode()
             self.__writeLog(f"[{time.asctime()}]: Executing Proof of work...\n")
             newBlock.pow()
-            # newBlock.calcHash()
+            newBlock.timestamp  = time.asctime()
             self.__minedBlock.append(newBlock.__dict__)
 
       # Reset to false, restart mining
@@ -238,7 +253,7 @@ class Node:
       self.__minerAbort.clear()
       
       # Return transacctions to mempool
-      self.__writeLog(f"[{time.asctime()}]: Returning transaccionts to mempool...\n")
+      self.__writeLog(f"[{time.asctime()}]: Returning transactions to mempool...\n")
       for tx in newBlock.transactions:
         self.__mempool.append(tx)
       

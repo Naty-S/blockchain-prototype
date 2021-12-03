@@ -6,6 +6,6 @@ MIN_OUTPUTS = 1
 MAX_OUTPUTS = 4
 
 # Block cofig vars
-MAX_SIZE         = 512    # Bytes
+BLOCK_MAX_SIZE   = 512    # Bytes
 T_BLOCK_CREATION = 1      # Mins
-DIFFICULTY       = 1000
+INIT_DIFFICULTY  = 1000
