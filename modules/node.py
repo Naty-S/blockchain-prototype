@@ -1,4 +1,5 @@
 import ast, pymerkle, socket, threading, time
+from typing import Tuple
 
 import config.variables    as vars
 import modules.block       as block
@@ -8,14 +9,14 @@ import modules.identity    as id
 
 class Node:
 
-  def __init__(self, node: id.Node, neighbours: list[int], logDir: str, blockchain: bc.Blockchain) -> None:
+  def __init__(self, node: id.Node, neighbours: list[Tuple[str,int]], logDir: str, blockchain: bc.Blockchain) -> None:
 
     self.__name         = node.name
     self.__port         = node.port
     self.__privKey      = node.privKey
     self.__publKey      = node.publKey
     self.__logFile      = logDir + self.__name + ".log"
-    # [int]: Neighbours ports
+    # [(str,int)]: Neighbours ports
     self.__neighbours   = neighbours
     # [dict]: Transactions already spread
     self.__spreadTxs    = []  
