@@ -1,11 +1,13 @@
+#!/usr/bin/env python3
 import hashlib
+from typing import List
 
 import modules.identity as id
 
 
 class Transaction:
 
-  def __init__(self, sender: id.User, receiver: id.User, satoshis: int, inputs: list[dict]) -> None:
+  def __init__(self, sender: id.User, receiver: id.User, satoshis: int, inputs: List[dict]) -> None:
     
     tx              = sender.address.encode() + receiver.address.encode()
     self.txId       = hashlib.sha256(hashlib.sha256(tx).hexdigest().encode()).hexdigest()

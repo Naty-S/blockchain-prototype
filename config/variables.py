@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Transactions config vars
 FREQUENCY   = 8
 MIN_INPUTS  = 1

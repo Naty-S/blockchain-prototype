@@ -1,11 +1,13 @@
+#!/usr/bin/env python3
 import hashlib
+from typing import List
 
 import config.variables    as vars
 
 
 class Block:
 
-  def __init__(self, prevBlock: str, merkleRoot: str, transactions: list[str]) -> None:
+  def __init__(self, prevBlock: str, merkleRoot: str, transactions: List[str]) -> None:
 
     self.size         = 0
     self.nonce        = 0

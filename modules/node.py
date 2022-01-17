@@ -1,5 +1,6 @@
+#!/usr/bin/env python3
 import ast, pymerkle, socket, threading, time
-from typing import Tuple
+from typing import Tuple, List
 
 
 import config.variables    as vars
@@ -10,7 +11,7 @@ import modules.identity    as id
 
 class Node:
 
-  def __init__(self, node: id.Node, neighbours: list[Tuple[str,int]], logDir: str, blockchain: bc.Blockchain) -> None:
+  def __init__(self, node: id.Node, neighbours: List[Tuple[str,int]], logDir: str, blockchain: bc.Blockchain) -> None:
 
     self.__name         = node.name
     self.__port         = node.port
@@ -191,7 +192,7 @@ class Node:
       self.__writeLog(f"[{time.asctime()}]: Sending to {neighbour}: {info}...\n")
       
       s = socket.socket()
-      s.connect((b'localhost', neighbour))
+      s.connect((b'localhost', neighbour[1]))
       s.send(msg) # TODO: Encrypt
       # BUG: Infinit loop/wait
       # self.__writeLog(f"[{time.asctime()}]: Waiting ack...\n")

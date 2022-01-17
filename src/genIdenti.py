@@ -1,11 +1,12 @@
+#!/usr/bin/env python3
 import bitcoin as btc
-from typing import Tuple
+from typing import Tuple, List, Dict
 
 import modules.identity    as id
 import modules.transaction as tx
 
 
-def genIdenti(identities: int, nodos: int) -> Tuple[list[id.User], dict[str,id.Node]]:
+def genIdenti(identities: int, nodos: int) -> Tuple[List[id.User], Dict[str,id.Node]]:
   
   users = []
   nodes = {}

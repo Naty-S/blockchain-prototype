@@ -1,6 +1,5 @@
-
+#!/usr/bin/env python3
 import modules.block       as block
-import modules.transaction as tx
 
 
 class Blockchain:

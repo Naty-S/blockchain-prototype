@@ -1,4 +1,6 @@
+#!/usr/bin/env python3
 import random, socket, time
+from typing import List, Dict
 
 
 import config.variables    as vars
@@ -6,7 +8,7 @@ import modules.identity    as id
 import modules.transaction as tx
 
 
-def genTransac(users: list[id.User], nodes: dict[str,id.Node], logDir: str) -> None:
+def genTransac(users: List[id.User], nodes: Dict[str,id.Node], logDir: str) -> None:
 
   nodesL  = list(nodes.values())
   logFile = logDir + "genTransac.log"

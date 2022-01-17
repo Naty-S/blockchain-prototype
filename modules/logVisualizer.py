@@ -1,4 +1,6 @@
+#!/usr/bin/env python3
 import glob
+from typing import List
 
 
 def logVisualizer(logsDir: str, flag: str) -> None:
@@ -28,12 +30,12 @@ def logVisualizer(logsDir: str, flag: str) -> None:
     print("Modos permitidos: visualizador paralelo(-mt) o secuencial(-mg)")
 
 
-def __sequential(logs: list[str]) -> None:
+def __sequential(logs: List[str]) -> None:
   
   logs.sort()
   for l in logs:
     print(l)
 
 
-def __parallel(logs: list[str], genTxsLog: list[str], nodesLog: list[str]) -> None:
+def __parallel(logs: List[str], genTxsLog: List[str], nodesLog: List[str]) -> None:
   pass

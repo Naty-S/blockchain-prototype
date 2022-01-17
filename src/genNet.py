@@ -1,10 +1,11 @@
+#!/usr/bin/env python3
 import random
-from typing import Tuple
+from typing import Tuple, List, Dict
 
 import modules.identity as id
 
 
-def genNetwork(nodes: dict[str,id.Node], pairs: int) -> list[Tuple[str,int]]:
+def genNetwork(nodes: Dict[str,id.Node], pairs: int) -> List[Tuple[str,int]]:
 
   nodesL     = list(nodes.values())
   net        = []
